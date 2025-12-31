@@ -79,7 +79,11 @@ static VALID_PINYIN: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-// 算法来自 https://github.com/xmflswood/pinyin-match/blob/master/src/core.js#L57
+/// 将一个全部由有效拼音拼接成的字符串进行拆分
+///
+/// 如 jinan => ["ji nan", "jin an"]；zhang => ["zhang"]；zhangssan => []
+///
+/// 算法来自 https://github.com/xmflswood/pinyin-match/blob/master/src/core.js#L57
 pub fn pinyin_split(value: impl AsRef<str>) -> Vec<String> {
     let pinyin = value.as_ref();
     // 去除声调
@@ -164,5 +168,8 @@ mod tests {
         let pinyin = "jínan";
         let split = super::pinyin_split(pinyin);
         assert_eq!(split, ["ji nan", "jin an"]);
+        let pinyin = "zhangssan";
+        let split = super::pinyin_split(pinyin);
+        assert!(split.is_empty())
     }
 }
