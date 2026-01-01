@@ -1,3 +1,6 @@
+mod trie_tokenizer;
+
+use crate::pinyin::trie_tokenizer::PINYIN_TRIE;
 use std::collections::{HashMap, HashSet};
 use std::sync::LazyLock;
 
@@ -79,7 +82,32 @@ static VALID_PINYIN: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-/// 将一个全部由有效拼音拼接成的字符串进行拆分
+/// 借助前缀树构建的 tokenizer 来切分拼音
+pub fn pinyin_tokenize(value: impl AsRef<str>) -> Vec<String> {
+    let value = value.as_ref();
+    let mut pinyins = Vec::<String>::new();
+    let len = value.len();
+    let mut i = 0;
+    while i < len {
+        let temp = &value[i..];
+        let (buf, is_success) = PINYIN_TRIE.find(temp);
+        if is_success && !buf.is_empty() {
+            pinyins.push(buf.to_owned());
+            i += buf.len();
+        } else {
+            i += 1;
+        }
+    }
+    pinyins
+}
+
+pub fn pinyin_split_by_trie_tokenizer(value: impl AsRef<str>) -> String {
+    pinyin_tokenize(value).join(" ")
+}
+
+/// 将一个全部由有效拼音拼接成的字符串进行拆分，拆分的拼音用空格相连
+///
+/// 尽可能拆分，有多种结果
 ///
 /// 如 jinan => ["ji nan", "jin an"]；zhang => ["zhang"]；zhangssan => []
 ///
@@ -158,7 +186,7 @@ fn get_all_pinyin_slice(
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_pinyin_break() {
+    fn test_pinyin_split() {
         let pinyin = "zhong";
         let split = super::pinyin_split(pinyin);
         assert_eq!(split, ["zhong"]);
@@ -171,5 +199,54 @@ mod tests {
         let pinyin = "zhangssan";
         let split = super::pinyin_split(pinyin);
         assert!(split.is_empty())
+    }
+
+    #[test]
+    fn test_pinyin_split_by_trie_tokenizer() {
+        let value = "wo3";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["wo"]);
+        let value = "nihao";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["ni", "hao"]);
+        let value = "lv3you2";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["lv", "you"]);
+        let value = "liu de hua";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["liu", "de", "hua"]);
+        // 如果拼音以 g 结尾，需要特殊处理
+        let value = "gong";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["gong"]);
+        let value = "guan";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["guan"]);
+        let value = "guang";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["guang"]);
+        let value = "guangu";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["guan", "gu"]);
+        let value = "guangei";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["guan", "gei"]);
+        let value = "guanger";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["guan", "ge"]);
+        let value = "womenzuogelvyougonglue";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(
+            pinyins,
+            ["wo", "men", "zuo", "ge", "lv", "you", "gong", "lue"]
+        );
+        // 对于不是纯拼音的字符串，找到合适的拼音子串
+        let value = "good luck";
+        let pinyins = super::pinyin_tokenize(value);
+        assert_eq!(pinyins, ["o", "o", "lu"]);
+        // 没有拼音
+        let value = "12233dddggsddfgdfgfdsddd";
+        let pinyins = super::pinyin_tokenize(value);
+        assert!(pinyins.is_empty());
     }
 }
