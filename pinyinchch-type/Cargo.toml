@@ -1,0 +1,16 @@
+[package]
+name = "pinyinchch-type"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+serde = ["dep:serde"]
+rkyv = ["dep:rkyv"]
+
+[dependencies]
+rkyv = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
