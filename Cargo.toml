@@ -11,8 +11,9 @@ edition = "2024"
 
 [workspace.dependencies]
 pinyinchch-type = { path = "pinyinchch-type", default-features = false }
-serde = { version = "1", features = ["derive"] }
 rkyv = "0.8.12"
+serde = { version = "1", features = ["derive"] }
+snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std", "rust_1_81"] }
 
 [package]
 name = "pinyinchch"
@@ -21,3 +22,6 @@ edition.workspace = true
 
 [dependencies]
 litemap = "0.8.1"
+pinyinchch-type = { workspace = true, features = ["rkyv"] }
+rkyv = { workspace = true }
+snafu = { workspace = true }

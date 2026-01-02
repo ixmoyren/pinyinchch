@@ -16,10 +16,10 @@ enum Action {
     ConvertToRkyv,
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     let cli = Cli::parse();
     match cli.action {
         Action::ConvertToRkyv => convert_to_rkyv(),
-    }?;
-    Ok(())
+    }
+    .unwrap();
 }
