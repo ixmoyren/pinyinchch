@@ -1,7 +1,23 @@
-[package]
-name = "pinyinchch"
+[workspace]
+resolver = "3"
+members = [
+    "pinyinchch-type",
+    "xtask",
+]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
+
+[workspace.dependencies]
+pinyinchch-type = { path = "pinyinchch-type", default-features = false }
+serde = { version = "1", features = ["derive"] }
+rkyv = "0.8.12"
+
+[package]
+name = "pinyinchch"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 litemap = "0.8.1"
