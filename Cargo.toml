@@ -26,6 +26,7 @@ keywords = ["Chinese", "Pinyin", "Hanzi", "Conversion", "Tokenize"]
 description = "一个拼音转汉字的工具库"
 readme = "README.md"
 repository = "https://github.com/ixmoyren/pinyinchch"
+exclude = ["data/*"]
 
 [features]
 default = ["hmm"]
