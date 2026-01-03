@@ -8,6 +8,7 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 pinyinchch = { path = ".", default-features = false }
@@ -20,6 +21,11 @@ snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std
 name = "pinyinchch"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+keywords = ["Chinese", "Pinyin", "Hanzi", "Conversion", "Tokenize"]
+description = "一个拼音转汉字的工具库"
+readme = "README.md"
+repository = "https://github.com/ixmoyren/pinyinchch"
 
 [features]
 default = ["hmm"]

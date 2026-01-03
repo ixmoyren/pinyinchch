@@ -2,6 +2,9 @@
 name = "pinyinchch-type"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+keywords = ["Chinese", "Pinyin", "Hanzi", "Conversion", "Tokenize"]
+description = "一个拼音转汉字的工具库"
 
 [lib]
 path = "lib.rs"
