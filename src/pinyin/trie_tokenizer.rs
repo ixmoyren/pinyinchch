@@ -428,6 +428,7 @@ pub(crate) static PINYIN_TRIE: LazyLock<TrieNode> = LazyLock::new(|| {
 });
 
 #[derive(Debug)]
+#[allow(unused)]
 pub(crate) struct TrieNode<'a> {
     key: &'a str,
     is_end: bool,

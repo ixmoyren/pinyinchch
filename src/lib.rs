@@ -1,12 +1,9 @@
 #[cfg(feature = "dag")]
 pub mod dag;
-mod error;
 #[cfg(feature = "hmm")]
 pub mod hmm;
 pub mod pinyin;
 mod priority;
-
-type Result<T> = std::result::Result<T, error::Error>;
 
 #[cfg(feature = "hmm")]
 mod hmm_dirt_data {
