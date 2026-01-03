@@ -16,7 +16,7 @@ pub struct DefaultHmm {
 }
 
 impl DefaultHmm {
-    fn try_new() -> crate::Result<Self> {
+    pub fn try_new() -> crate::Result<Self> {
         let py2hz =
             unsafe { rkyv::from_bytes_unchecked::<HmmPy2HzData, rkyv::rancor::Error>(HMM_PY2HZ) }
                 .context(RkyvSnafu {
