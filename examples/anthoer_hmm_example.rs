@@ -7,6 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let pinyin = "nihao";
 
+    // 对拼音字符串进行拆分
     let pinyin_split_str = pinyin_split_by_trie_tokenizer(pinyin);
 
     let pinyin_seq = pinyin_split_str.split(" ").collect::<Vec<_>>();
