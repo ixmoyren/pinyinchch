@@ -10,6 +10,7 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace.dependencies]
+pinyinchch = { path = ".", default-features = false }
 pinyinchch-type = { path = "pinyinchch-type", default-features = false }
 rkyv = { version = "0.8.12", default-features = true, features = ["aligned"] }
 serde = { version = "1", features = ["derive"] }
@@ -20,8 +21,16 @@ name = "pinyinchch"
 version.workspace = true
 edition.workspace = true
 
+[features]
+default = ["hmm"]
+hmm = []
+dag = []
+
 [dependencies]
 litemap = "0.8.1"
 pinyinchch-type = { workspace = true, features = ["rkyv"] }
 rkyv = { workspace = true }
 snafu = { workspace = true }
+
+[dev-dependencies]
+pinyinchch = { workspace = true, features = ["hmm", "dag"] }

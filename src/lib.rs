@@ -1,11 +1,14 @@
+#[cfg(feature = "dag")]
 pub mod dag;
 mod error;
+#[cfg(feature = "hmm")]
 pub mod hmm;
 pub mod pinyin;
 mod priority;
 
 type Result<T> = std::result::Result<T, error::Error>;
 
+#[cfg(feature = "hmm")]
 mod hmm_dirt_data {
     use crate::embed_data;
     use pinyinchch_type::{HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
@@ -39,6 +42,7 @@ mod hmm_dirt_data {
     );
 }
 
+#[cfg(feature = "dag")]
 mod dag_dirt_data {
     use crate::embed_data;
     use pinyinchch_type::{DagChar, DagPhrase};
@@ -55,6 +59,20 @@ mod dag_dirt_data {
         DAG_PHRASE_BYTES,
         "../bin_data/dag_phrase.rkyv"
     );
+
+    #[cfg(test)]
+    mod tests {
+        use super::DAG_CHAR_BYTES;
+        use pinyinchch_type::DagChar;
+        #[test]
+        fn test_deserialized_dag_char_from_rkyv_file() {
+            let mut aligned = rkyv::util::AlignedVec::<16>::new();
+            aligned.extend_from_slice(DAG_CHAR_BYTES);
+            let dag_char = rkyv::from_bytes::<DagChar, rkyv::rancor::Error>(&aligned).unwrap();
+            let a = dag_char.data.get("a").unwrap();
+            assert_eq!(a[1].0, "\u{554a}".to_owned());
+        }
+    }
 }
 
 #[macro_export]
@@ -72,18 +90,4 @@ macro_rules! embed_data {
             ))
         });
     };
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::dag_dirt_data::DAG_CHAR_BYTES;
-    use pinyinchch_type::DagChar;
-    #[test]
-    fn test_deserialized_dag_char_from_rkyv_file() {
-        let mut aligned = rkyv::util::AlignedVec::<16>::new();
-        aligned.extend_from_slice(DAG_CHAR_BYTES);
-        let dag_char = rkyv::from_bytes::<DagChar, rkyv::rancor::Error>(&aligned).unwrap();
-        let a = dag_char.data.get("a").unwrap();
-        assert_eq!(a[1].0, "\u{554a}".to_owned());
-    }
 }
