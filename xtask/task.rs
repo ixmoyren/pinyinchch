@@ -1,5 +1,5 @@
 use pinyinchch_type::{
-    DagCharData, DagPhraseData, HmmData, HmmEmissionData, HmmPy2HzData, HmmTransitionData,
+    DagChar, DagPhrase, HmmData, HmmEmissionData, HmmPy2HzData, HmmTransitionData,
 };
 use rkyv::util::AlignedVec;
 use snafu::{Whatever, prelude::*};
@@ -55,22 +55,19 @@ fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
     writer
         .write_all(bytes.as_slice())
         .with_whatever_context(|_| format!("Couldn't write to {new_file_name}"))?;
-    writer
-        .flush()
-        .with_whatever_context(|_| format!("Couldn't write flush to {new_file_name}"))?;
     Ok(())
 }
 
 fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, Whatever> {
     let bytes = match file_name {
         "dag_char.json" => {
-            let dag_char = serde_json::from_reader::<_, DagCharData>(reader)
+            let dag_char = serde_json::from_reader::<_, DagChar>(reader)
                 .with_whatever_context(|_| "Couldn't read dag_char.json")?;
             rkyv::to_bytes::<rkyv::rancor::Error>(&dag_char)
                 .with_whatever_context(|_| "The dag_char couldn't serialize to rkyv")?
         }
         "dag_phrase.json" => {
-            let dag_phrase = serde_json::from_reader::<_, DagPhraseData>(reader)
+            let dag_phrase = serde_json::from_reader::<_, DagPhrase>(reader)
                 .with_whatever_context(|_| "Couldn't read dag_phrase.json")?;
             rkyv::to_bytes::<rkyv::rancor::Error>(&dag_phrase)
                 .with_whatever_context(|_| "The dag_phrase couldn't serialize to rkyv")?
@@ -103,4 +100,24 @@ fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, 
     };
 
     Ok(bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::task::to_bytes;
+    use pinyinchch_type::DagChar;
+    use std::fs::File;
+    use std::io::BufReader;
+
+    #[test]
+    fn test() {
+        let path = "../data/dag_char.json";
+        // 读取 json 和转换成 rkyv
+        let file = File::open(path).unwrap();
+        let reader = BufReader::new(file);
+        let bytes = to_bytes(reader, "dag_char.json").unwrap();
+        let _ =
+            unsafe { rkyv::from_bytes_unchecked::<DagChar, rkyv::rancor::Error>(bytes.as_slice()) }
+                .unwrap();
+    }
 }

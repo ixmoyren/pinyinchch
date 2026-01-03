@@ -50,7 +50,7 @@ pub struct HmmEmissionData {
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
-pub struct DagCharData {
+pub struct DagChar {
     #[cfg_attr(feature = "serde", serde(flatten))]
     pub data: HashMap<String, Vec<(String, f64)>>,
 }
@@ -61,7 +61,7 @@ pub struct DagCharData {
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
-pub struct DagPhraseData {
+pub struct DagPhrase {
     #[cfg_attr(feature = "serde", serde(flatten))]
     pub data: HashMap<String, Vec<(String, f64)>>,
 }
