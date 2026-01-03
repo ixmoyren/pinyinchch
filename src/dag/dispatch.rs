@@ -4,37 +4,37 @@ use crate::priority::{Item, PrioritySet};
 /// DAG算法实现拼音转汉字
 ///
 /// # Arguments
-/// * `dag_params` - DAG参数实现
-/// * `pinyin_list` - 拼音列表
+/// * `dag` - DAG参数实现
+/// * `pinyin_seq` - 拼音列表
 /// * `path_num` - 返回路径数量
-/// * `log` - 是否使用对数概率
+/// * `use_log_prob` - 是否使用对数概率
 pub fn dispatch(
-    dag_params: &impl Dag,
-    pinyin_list: &[&str],
+    dag: &impl Dag,
+    pinyin_seq: &[&str],
     path_num: usize,
-    log: bool,
+    use_log_prob: bool,
 ) -> Vec<Item> {
-    let pinyin_num = pinyin_list.len();
-    if pinyin_num == 0 {
+    if pinyin_seq.is_empty() {
         return Vec::new();
     }
+    let pinyin_num = pinyin_seq.len();
 
     // 创建动态规划数组
-    let mut dag_vec = Vec::with_capacity(pinyin_num);
+    let mut dispatch_vec = Vec::with_capacity(pinyin_num);
     for _ in 0..pinyin_num {
-        dag_vec.push(PrioritySet::new(path_num));
+        dispatch_vec.push(PrioritySet::new(path_num));
     }
 
     // 处理起始位置（from_idx = 0）
     for from_idx in 0..1 {
         for to_idx in from_idx..pinyin_num {
-            let slice = &pinyin_list[from_idx..to_idx + 1];
+            let slice = &pinyin_seq[from_idx..to_idx + 1];
 
-            let kvs = dag_params.get_phrase(slice, path_num);
-            for (phrase, prob) in kvs {
+            let phrase_prob_pairs = dag.get_phrase(slice, path_num);
+            for (phrase, prob) in phrase_prob_pairs {
                 let word = vec![phrase];
-                let score = if log { prob.ln() } else { prob };
-                dag_vec[to_idx].put(score, word);
+                let score = if use_log_prob { prob.ln() } else { prob };
+                dispatch_vec[to_idx].put(score, word);
             }
         }
     }
@@ -42,34 +42,34 @@ pub fn dispatch(
     // 处理后续位置（from_idx >= 1）
     for from_idx in 1..pinyin_num {
         // 先收集前一个位置的数据，避免借用冲突
-        let prev_items: Vec<_> = dag_vec[from_idx - 1]
+        let prev_items: Vec<_> = dispatch_vec[from_idx - 1]
             .iter()
             .map(|item| (item.score(), item.path().clone()))
             .collect();
 
         for to_idx in from_idx..pinyin_num {
-            let slice = &pinyin_list[from_idx..to_idx + 1];
+            let slice = &pinyin_seq[from_idx..to_idx + 1];
 
-            let kvs = dag_params.get_phrase(slice, path_num);
+            let phrase_prob_pairs = dag.get_phrase(slice, path_num);
             for (prev_score, prev_path) in &prev_items {
-                for (phrase, prob) in &kvs {
+                for (phrase, prob) in &phrase_prob_pairs {
                     let mut word = prev_path.clone();
                     word.push(phrase.clone());
 
-                    let score = if log {
+                    let score = if use_log_prob {
                         *prev_score + prob.ln()
                     } else {
                         *prev_score * prob
                     };
 
-                    dag_vec[to_idx].put(score, word);
+                    dispatch_vec[to_idx].put(score, word);
                 }
             }
         }
     }
 
     // 获取最终结果
-    let mut result: Vec<Item> = dag_vec.last().unwrap().to_sorted_vec();
+    let mut result: Vec<Item> = dispatch_vec.last().unwrap().to_sorted_vec();
     result.sort_by(|a, b| {
         b.score()
             .partial_cmp(&a.score())

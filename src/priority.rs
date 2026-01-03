@@ -39,7 +39,10 @@ impl PartialOrd for Item {
 
 impl Ord for Item {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+        other
+            .score
+            .partial_cmp(&self.score)
+            .unwrap_or(Ordering::Equal)
     }
 }
 
@@ -70,7 +73,7 @@ impl PrioritySet {
 
         // 保持容量限制
         while self.data.len() > self.capacity {
-            // 弹出最小的元素，BinaryHeap是最大堆，但Item实现了反转的比较
+            // 弹出最小的元素，BinaryHeap 是最大堆，但 Item 实现了反转的比较
             self.data.pop();
         }
     }
