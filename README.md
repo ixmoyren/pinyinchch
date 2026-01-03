@@ -17,7 +17,7 @@ cargo add pinyinchch
 
 ## 使用方法
 
-### HMM 算法示例
+### HMM 示例
 
 ```rust
 use pinyinchch::hmm::{viterbi, DefaultHmm};
@@ -54,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### DAG 算法示例
+### DAG 示例
 
 ```rust
 use pinyinchch::dag::{DefaultDag, dispatch};
