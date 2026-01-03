@@ -2,7 +2,7 @@ use crate::dag::Dag;
 use crate::dag_dirt_data::{DAG_CHAR, DAG_PHRASE};
 
 /// 默认DAG参数实现
-/// #[derive(Default)]
+#[derive(Default)]
 pub struct DefaultDag {}
 
 impl Dag for DefaultDag {
