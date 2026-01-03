@@ -11,7 +11,7 @@ edition = "2024"
 
 [workspace.dependencies]
 pinyinchch-type = { path = "pinyinchch-type", default-features = false }
-rkyv = "0.8.12"
+rkyv = { version = "0.8.12", default-features = true, features = ["aligned"] }
 serde = { version = "1", features = ["derive"] }
 snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std", "rust_1_81"] }
 

@@ -2,22 +2,21 @@ use crate::hmm::Hmm;
 use crate::priority::{Item, PrioritySet};
 use std::collections::HashMap;
 
-/// Viterbi算法实现拼音转汉字
+/// 使用 Viterbi 算法，实现拼音转汉字
 ///
-/// # Arguments
-/// * `hmm_params` - HMM参数实现
-/// * `observations` - 观测序列（拼音列表）
+/// * `hmm` - HMM 实现
+/// * `pinyin_seq` - 需要转换的拼音序列
 /// * `path_num` - 返回路径数量
-/// * `log` - 是否使用对数概率
+/// * `use_log_prob` - 是否使用对数概率
 /// * `min_prob` - 最小概率值，防止概率为0
 pub fn viterbi(
     hmm: &impl Hmm,
-    observations: &[&str],
+    pinyin_seq: &[&str],
     path_num: usize,
-    log: bool,
+    use_log_prob: bool,
     min_prob: f64,
 ) -> Vec<Item> {
-    if observations.is_empty() {
+    if pinyin_seq.is_empty() {
         return Vec::new();
     }
 
@@ -25,7 +24,7 @@ pub fn viterbi(
     let mut time_and_state = Vec::<HashMap<String, PrioritySet>>::new();
 
     let time = 0;
-    let cur_obs = observations[time];
+    let cur_obs = pinyin_seq[time];
 
     // 初始化基础情况 (t == 0)
     let mut prev_states = hmm.get_states(cur_obs);
@@ -35,7 +34,7 @@ pub fn viterbi(
     for state in &cur_states {
         let start_prob = hmm.start(state);
         let emission_prob = hmm.emission(state, cur_obs);
-        let score = if log {
+        let score = if use_log_prob {
             f64::max(start_prob, min_prob).ln() + f64::max(emission_prob, min_prob).ln()
         } else {
             f64::max(start_prob, min_prob) * f64::max(emission_prob, min_prob)
@@ -50,8 +49,8 @@ pub fn viterbi(
     time_and_state.push(initial_map);
 
     // 运行 t > 0 的Viterbi算法
-    for t in 1..observations.len() {
-        let cur_obs = &observations[t];
+    for t in 1..pinyin_seq.len() {
+        let cur_obs = &pinyin_seq[t];
         // 优化内存使用：只保留前一个时刻的结果
         if time_and_state.len() == 2 {
             time_and_state = vec![time_and_state[time_and_state.len() - 1].clone()];
@@ -71,7 +70,7 @@ pub fn viterbi(
                         let transition_prob = hmm.transition(y0, y);
                         let emission_prob = hmm.emission(y, cur_obs);
 
-                        let new_score = if log {
+                        let new_score = if use_log_prob {
                             item.score()
                                 + f64::max(transition_prob, min_prob).ln()
                                 + f64::max(emission_prob, min_prob).ln()

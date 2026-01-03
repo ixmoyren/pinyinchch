@@ -17,7 +17,7 @@ pub struct HmmData {
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
-pub struct HmmPy2HzData {
+pub struct HmmPy2Hz {
     #[cfg_attr(feature = "serde", serde(flatten))]
     pub data: HashMap<String, String>,
 }
@@ -28,7 +28,7 @@ pub struct HmmPy2HzData {
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
-pub struct HmmTransitionData {
+pub struct HmmTransition {
     pub data: HashMap<String, HashMap<String, f64>>,
     pub default: f64,
 }
@@ -39,7 +39,7 @@ pub struct HmmTransitionData {
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
-pub struct HmmEmissionData {
+pub struct HmmEmission {
     pub data: HashMap<String, HashMap<String, f64>>,
     pub default: f64,
 }

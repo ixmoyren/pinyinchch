@@ -1,10 +1,10 @@
 use crate::dag::Dag;
 use crate::priority::{Item, PrioritySet};
 
-/// DAG算法实现拼音转汉字
+/// 使用动态规划算法，实现拼音转汉字
 ///
 /// # Arguments
-/// * `dag` - DAG参数实现
+/// * `dag` - DAG 实现
 /// * `pinyin_seq` - 拼音列表
 /// * `path_num` - 返回路径数量
 /// * `use_log_prob` - 是否使用对数概率

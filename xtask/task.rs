@@ -1,6 +1,4 @@
-use pinyinchch_type::{
-    DagChar, DagPhrase, HmmData, HmmEmissionData, HmmPy2HzData, HmmTransitionData,
-};
+use pinyinchch_type::{DagChar, DagPhrase, HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
 use rkyv::util::AlignedVec;
 use snafu::{Whatever, prelude::*};
 use std::fs::{File, create_dir_all, read_dir};
@@ -48,13 +46,19 @@ fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
     let file = File::open(path).with_whatever_context(|_| format!("Couldn't open {file_name}"))?;
     let reader = BufReader::new(file);
     let bytes = to_bytes(reader, file_name)?;
+    let mut buf = Vec::new();
+    buf.write_all(&bytes)
+        .with_whatever_context(|_| "Couldn't write to buf")?;
     // 写入文件
     let file = File::create(bin_data_root_path.join(&new_file_name))
         .with_whatever_context(|_| format!("Couldn't create {new_file_name}"))?;
     let mut writer = BufWriter::new(file);
     writer
-        .write_all(bytes.as_slice())
+        .write_all(&buf)
         .with_whatever_context(|_| format!("Couldn't write to {new_file_name}"))?;
+    writer
+        .flush()
+        .with_whatever_context(|_| "Couldn't flush {new_file_name}")?;
     Ok(())
 }
 
@@ -73,13 +77,13 @@ fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, 
                 .with_whatever_context(|_| "The dag_phrase couldn't serialize to rkyv")?
         }
         "hmm_emission.json" => {
-            let hmm_emission = serde_json::from_reader::<_, HmmEmissionData>(reader)
+            let hmm_emission = serde_json::from_reader::<_, HmmEmission>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_emission.json")?;
             rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_emission)
                 .with_whatever_context(|_| "The hmm_emission couldn't serialize to rkyv")?
         }
         "hmm_py2hz.json" => {
-            let hmm_py2hz = serde_json::from_reader::<_, HmmPy2HzData>(reader)
+            let hmm_py2hz = serde_json::from_reader::<_, HmmPy2Hz>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_py2hz.json")?;
             rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_py2hz)
                 .with_whatever_context(|_| "The hmm_py2hz couldn't serialize to rkyv")?
@@ -91,7 +95,7 @@ fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, 
                 .with_whatever_context(|_| "The hmm_start couldn't serialize to rkyv")?
         }
         "hmm_transition.json" => {
-            let hmm_transition = serde_json::from_reader::<_, HmmTransitionData>(reader)
+            let hmm_transition = serde_json::from_reader::<_, HmmTransition>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_transition.json")?;
             rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_transition)
                 .with_whatever_context(|_| "The hmm_transition couldn't serialize to rkyv")?
