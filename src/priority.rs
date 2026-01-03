@@ -72,7 +72,7 @@ impl PrioritySet {
         self.data.push(item);
 
         // 保持容量限制
-        while self.data.len() > self.capacity {
+        while self.len() > self.capacity {
             // 弹出最小的元素，BinaryHeap 是最大堆，但 Item 实现了反转的比较
             self.data.pop();
         }
@@ -80,10 +80,6 @@ impl PrioritySet {
 
     pub fn len(&self) -> usize {
         self.data.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.data.is_empty()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Item> {
