@@ -1,5 +1,8 @@
 [unstable]
 trim-paths = true
 
+[build]
+target-dir = "target"
+
 [alias]
 xtask = "run -q --manifest-path ./xtask/Cargo.toml --"
