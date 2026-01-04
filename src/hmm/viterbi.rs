@@ -1,5 +1,5 @@
-use crate::hmm::Hmm;
 use crate::priority::{Item, PrioritySet};
+use pinyinchch_type::hmm::Hmm;
 use std::collections::HashMap;
 
 /// 使用 Viterbi 算法，实现拼音转汉字
@@ -119,6 +119,7 @@ mod tests {
     use super::*;
 
     // 为测试创建一个简单的HMM参数实现
+    #[allow(unused)]
     struct TestHmm {
         states: Vec<String>,
         start_probs: HashMap<String, f64>,

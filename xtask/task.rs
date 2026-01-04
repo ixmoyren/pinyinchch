@@ -1,4 +1,5 @@
-use pinyinchch_type::{DagChar, DagPhrase, HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
+use pinyinchch_type::dag::{DagChar, DagPhrase};
+use pinyinchch_type::hmm::{HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
 use rkyv::util::AlignedVec;
 use snafu::{Whatever, prelude::*};
 use std::fs::{File, create_dir_all, read_dir};
@@ -109,7 +110,7 @@ fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, 
 #[cfg(test)]
 mod tests {
     use crate::task::to_bytes;
-    use pinyinchch_type::DagChar;
+    use pinyinchch_type::dag::DagChar;
     use std::fs::File;
     use std::io::BufReader;
 

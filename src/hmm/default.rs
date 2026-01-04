@@ -1,5 +1,5 @@
-use crate::hmm::Hmm;
 use crate::hmm_dirt_data::{HMM_EMISSION, HMM_PY2HZ, HMM_START, HMM_TRANSITION};
+use pinyinchch_type::hmm::Hmm;
 
 const DEFAULT: &str = "default";
 

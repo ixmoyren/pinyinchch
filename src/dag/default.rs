@@ -1,5 +1,5 @@
-use crate::dag::Dag;
 use crate::dag_dirt_data::{DAG_CHAR, DAG_PHRASE};
+use pinyinchch_type::dag::Dag;
 
 /// 默认DAG参数实现
 #[derive(Default)]

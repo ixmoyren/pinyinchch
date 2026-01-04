@@ -8,7 +8,7 @@ mod priority;
 #[cfg(feature = "hmm")]
 mod hmm_dirt_data {
     use crate::embed_data;
-    use pinyinchch_type::{HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
+    use pinyinchch_type::hmm::{HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
 
     embed_data!(
         HMM_EMISSION,
@@ -42,7 +42,7 @@ mod hmm_dirt_data {
 #[cfg(feature = "dag")]
 mod dag_dirt_data {
     use crate::embed_data;
-    use pinyinchch_type::{DagChar, DagPhrase};
+    use pinyinchch_type::dag::{DagChar, DagPhrase};
 
     embed_data!(
         DAG_CHAR,
@@ -60,7 +60,7 @@ mod dag_dirt_data {
     #[cfg(test)]
     mod tests {
         use super::DAG_CHAR_BYTES;
-        use pinyinchch_type::DagChar;
+        use pinyinchch_type::dag::DagChar;
         #[test]
         fn test_deserialized_dag_char_from_rkyv_file() {
             let mut aligned = rkyv::util::AlignedVec::<16>::new();

@@ -1,5 +1,5 @@
-use crate::dag::Dag;
 use crate::priority::{Item, PrioritySet};
+use pinyinchch_type::dag::Dag;
 
 /// 使用动态规划算法，实现拼音转汉字
 ///
