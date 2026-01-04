@@ -11,17 +11,50 @@
 
 ## 安装
 
-```shell
-cargo add pinyinchch
-```
+- 如果使用 hmm 的 Viterbi 算法进行拼音到汉字的转换，那么需要启用 hmm 功能。
 
-## 使用方法
+  ```shell
+  cargo add pinyinchch -F hmm
+  ```
 
-### HMM 示例
+  如果使用默认提供的 hmm 模型，则需要引入 pinyinchch-model-hmm
+
+  ```shell
+  cargo add pinyinchch-model-hmm
+  ```
+
+  如果想自己实现一个拼音到汉字的 hmm 模型，那么需要引入 pinyinchch-type, 并且实现 `Hmm` trait
+
+  ```shell
+  cargo add pinyinchch-type
+  ```
+
+- 如果使用 dag 的动态规划算法进行拼音到汉字的转换，那么需要启用 dag 功能。
+
+  ```shell
+  cargo add pinyinchch -F dag
+  ```
+
+  如果需要使用默认提供的 dag 模型，则需要引入 pinyinchch-model-dag
+
+  ```shell
+  cargo add pinyinchch-model-dag
+  ```
+
+  如果想自己实现一个拼音到汉字的 dag 模型，那么需要引入 pinyinchch-type, 并且实现 `dag` trait
+
+  ```shell
+  cargo add pinyinchch-type
+  ```
+
+## 使用示例
+
+### 使用默认 HMM 模型将拼音转换成汉字
 
 ```rust
-use pinyinchch::hmm::{viterbi, DefaultHmm};
+use pinyinchch::hmm::viterbi;
 use pinyinchch::pinyin::pinyin_split_by_trie_tokenizer;
+use pinyinchch_model_hmm::DefaultHmm;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建 HMM 实例
@@ -54,10 +87,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### DAG 示例
+### 使用默认的 DAG 模型将拼音转换成汉字
 
 ```rust
-use pinyinchch::dag::{DefaultDag, dispatch};
+use pinyinchch::dag::dispatch;
+use pinyinchch_model_dag::DefaultDag;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建DAG参数实例
@@ -84,7 +118,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
 ```
 
 ## 特性
