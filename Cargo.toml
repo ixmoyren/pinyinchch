@@ -8,15 +8,15 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 pinyinchch = { path = ".", default-features = false }
-pinyinchch-type = { path = "pinyinchch-type", version = "0.1.0", default-features = false }
-pinyinchch-model-hmm = { path = "pinyinchch-model-hmm", version = "0.1.0", default-features = false }
-pinyinchch-model-dag = { path = "pinyinchch-model-dag", version = "0.1.0", default-features = false }
+pinyinchch-type = { path = "pinyinchch-type", version = "0.2.0", default-features = false }
+pinyinchch-model-hmm = { path = "pinyinchch-model-hmm", version = "0.2.0", default-features = false }
+pinyinchch-model-dag = { path = "pinyinchch-model-dag", version = "0.2.0", default-features = false }
 rkyv = { version = "0.8.12", default-features = true, features = ["aligned"] }
 serde = { version = "1", features = ["derive"] }
 snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std", "rust_1_81"] }
