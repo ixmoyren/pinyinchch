@@ -3,6 +3,8 @@ name = "pinyinchch-model-hmm"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+keywords = ["Chinese", "Pinyin", "Hanzi", "Conversion", "Hmm"]
+description = "一个拼音转汉字的 Hmm 模型"
 
 [lib]
 path = "lib.rs"
