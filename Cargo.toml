@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = [
+    "pinyinchch-model-dag",
+    "pinyinchch-model-hmm",
     "pinyinchch-type",
     "xtask",
 ]
@@ -13,6 +15,8 @@ license = "MIT OR Apache-2.0"
 [workspace.dependencies]
 pinyinchch = { path = ".", default-features = false }
 pinyinchch-type = { path = "pinyinchch-type", version = "0.1.0", default-features = false }
+pinyinchch-model-hmm = { path = "pinyinchch-model-hmm", version = "0.1.0", default-features = false }
+pinyinchch-model-dag = { path = "pinyinchch-model-dag", version = "0.1.0", default-features = false }
 rkyv = { version = "0.8.12", default-features = true, features = ["aligned"] }
 serde = { version = "1", features = ["derive"] }
 snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std", "rust_1_81"] }
@@ -29,15 +33,15 @@ repository = "https://github.com/ixmoyren/pinyinchch"
 exclude = ["data/*"]
 
 [features]
-default = ["hmm"]
+default = []
 hmm = []
 dag = []
 
 [dependencies]
 litemap = "0.8.1"
 pinyinchch-type = { workspace = true, features = ["rkyv"] }
-rkyv = { workspace = true }
-snafu = { workspace = true }
 
 [dev-dependencies]
 pinyinchch = { workspace = true, features = ["hmm", "dag"] }
+pinyinchch-model-dag = { workspace = true }
+pinyinchch-model-hmm = { workspace = true }

@@ -1,0 +1,12 @@
+[package]
+name = "pinyinchch-model-hmm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+pinyinchch-type = { workspace = true, features = ["rkyv"] }
+rkyv = { workspace = true }

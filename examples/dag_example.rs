@@ -1,4 +1,5 @@
-use pinyinchch::dag::{DefaultDag, dispatch};
+use pinyinchch::dag::dispatch;
+use pinyinchch_model_dag::DefaultDag;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建DAG参数实例

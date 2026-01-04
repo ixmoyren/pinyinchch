@@ -29,24 +29,10 @@ fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
     let Some(file_name) = path.file_name().and_then(std::ffi::OsStr::to_str) else {
         whatever!("The path does not have a file name");
     };
-    // rkyv 文件保存的目录
-    let bin_data_root_path = PathBuf::from_str("bin_data")
-        .with_whatever_context(|_| "Couldn't crate path buf from str")?;
-    if bin_data_root_path.exists() && bin_data_root_path.is_file() {
-        whatever!("The bin_data cannot be a file");
-    }
-    if !bin_data_root_path.exists() {
-        // 创建文件夹
-        create_dir_all(&bin_data_root_path).with_whatever_context(|_| {
-            format!("Couldn't create dir {}", bin_data_root_path.display())
-        })?;
-    }
-    // rkyv 的文件名
-    let new_file_name = file_name.replace(".json", ".rkyv");
     // 读取 json 和转换成 rkyv
     let file = File::open(path).with_whatever_context(|_| format!("Couldn't open {file_name}"))?;
     let reader = BufReader::new(file);
-    let bytes = to_bytes(reader, file_name)?;
+    let (bytes, new_file_name, bin_data_root_path) = to_bytes(reader, file_name)?;
     let mut buf = Vec::new();
     buf.write_all(&bytes)
         .with_whatever_context(|_| "Couldn't write to buf")?;
@@ -63,48 +49,82 @@ fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
     Ok(())
 }
 
-fn to_bytes(reader: BufReader<File>, file_name: &str) -> Result<AlignedVec<16>, Whatever> {
-    let bytes = match file_name {
+fn get_rkyv_name_and_path(file_name: &str, path: &str) -> Result<(String, PathBuf), Whatever> {
+    // rkyv 文件保存的目录
+    let root_path =
+        PathBuf::from_str(path).with_whatever_context(|_| "Couldn't crate path buf from str")?;
+    let bin_data_root_path = root_path.join("bin");
+    if bin_data_root_path.exists() && bin_data_root_path.is_file() {
+        whatever!("The bin_data cannot be a file");
+    }
+    if !bin_data_root_path.exists() {
+        // 创建文件夹
+        create_dir_all(&bin_data_root_path).with_whatever_context(|_| {
+            format!("Couldn't create dir {}", bin_data_root_path.display())
+        })?;
+    }
+    // rkyv 的文件名
+    let rkyv_file_name = file_name.replace(".json", ".rkyv");
+    Ok((rkyv_file_name, bin_data_root_path))
+}
+
+fn to_bytes(
+    reader: BufReader<File>,
+    file_name: &str,
+) -> Result<(AlignedVec<16>, String, PathBuf), Whatever> {
+    let result = match file_name {
         "dag_char.json" => {
             let dag_char = serde_json::from_reader::<_, DagChar>(reader)
                 .with_whatever_context(|_| "Couldn't read dag_char.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&dag_char)
-                .with_whatever_context(|_| "The dag_char couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&dag_char)
+                .with_whatever_context(|_| "The dag_char couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-dag")?;
+            (bytes, rkyv_file_name, path)
         }
         "dag_phrase.json" => {
             let dag_phrase = serde_json::from_reader::<_, DagPhrase>(reader)
                 .with_whatever_context(|_| "Couldn't read dag_phrase.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&dag_phrase)
-                .with_whatever_context(|_| "The dag_phrase couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&dag_phrase)
+                .with_whatever_context(|_| "The dag_phrase couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-dag")?;
+            (bytes, rkyv_file_name, path)
         }
         "hmm_emission.json" => {
             let hmm_emission = serde_json::from_reader::<_, HmmEmission>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_emission.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_emission)
-                .with_whatever_context(|_| "The hmm_emission couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_emission)
+                .with_whatever_context(|_| "The hmm_emission couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-hmm")?;
+            (bytes, rkyv_file_name, path)
         }
         "hmm_py2hz.json" => {
             let hmm_py2hz = serde_json::from_reader::<_, HmmPy2Hz>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_py2hz.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_py2hz)
-                .with_whatever_context(|_| "The hmm_py2hz couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_py2hz)
+                .with_whatever_context(|_| "The hmm_py2hz couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-hmm")?;
+            (bytes, rkyv_file_name, path)
         }
         "hmm_start.json" => {
             let hmm_start = serde_json::from_reader::<_, HmmData>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_start.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_start)
-                .with_whatever_context(|_| "The hmm_start couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_start)
+                .with_whatever_context(|_| "The hmm_start couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-hmm")?;
+            (bytes, rkyv_file_name, path)
         }
         "hmm_transition.json" => {
             let hmm_transition = serde_json::from_reader::<_, HmmTransition>(reader)
                 .with_whatever_context(|_| "Couldn't read hmm_transition.json")?;
-            rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_transition)
-                .with_whatever_context(|_| "The hmm_transition couldn't serialize to rkyv")?
+            let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&hmm_transition)
+                .with_whatever_context(|_| "The hmm_transition couldn't serialize to rkyv")?;
+            let (rkyv_file_name, path) = get_rkyv_name_and_path(file_name, "pinyinchch-model-hmm")?;
+            (bytes, rkyv_file_name, path)
         }
         _ => whatever!("This type of file conversion is not supported"),
     };
 
-    Ok(bytes)
+    Ok(result)
 }
 
 #[cfg(test)]
@@ -120,7 +140,7 @@ mod tests {
         // 读取 json 和转换成 rkyv
         let file = File::open(path).unwrap();
         let reader = BufReader::new(file);
-        let bytes = to_bytes(reader, "dag_char.json").unwrap();
+        let (bytes, _, _) = to_bytes(reader, "dag_char.json").unwrap();
         let _ =
             unsafe { rkyv::from_bytes_unchecked::<DagChar, rkyv::rancor::Error>(bytes.as_slice()) }
                 .unwrap();

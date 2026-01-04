@@ -1,4 +1,5 @@
-use pinyinchch::hmm::{DefaultHmm, viterbi};
+use pinyinchch::hmm::viterbi;
+use pinyinchch_model_hmm::DefaultHmm;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建 HMM 实例
