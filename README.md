@@ -4,16 +4,16 @@
 
 ## 介绍
 
-这是一个用 Rust 重写的 [Pinyin2Hanzi](https://github.com/letiantian/Pinyin2Hanzi) 库，支持两种模型：
+这是一个用 Rust 重写的 [Pinyin2Hanzi](https://github.com/letiantian/Pinyin2Hanzi) 库，或者说是将 [Pinyin2Hanzi](https://github.com/letiantian/Pinyin2Hanzi) 库从 Python 移植到 Rust，支持两种模型：
 
 - **HMM (隐马尔可夫模型)**：使用 Viterbi 算法进行拼音转汉字
 - **DAG (有向无环图)**：使用动态规划算法进行拼音转汉字
 
 > [!NOTE]
 >
-> 本项目只实现了 Pinyin2Hanzi 中模型推理的部分，即实现拼音到汉字的转换。该项目中训练 HMM 和 DAG 模型的代码，并没有重写。
+> 本项目只实现了 Pinyin2Hanzi 中模型推理的部分，即实现拼音到汉字的转换，并未实现使用 Rust 训练 HMM 和 DAG 模型。
 >
-> 本项目中将 HMM 和 DAG 模型，封装成不同的 crate，可以按需引入。也可以自己实现 HMM 和 DAG 模型
+> 本项目中将 [Pinyin2Hanzi](https://github.com/letiantian/Pinyin2Hanzi) 提供的 HMM 和 DAG 模型封装成不同的 crate，按需引入。也可以通过实现 `pingyinchch-type` 中定义的 `trait Hmm` 和 `trait Dag`，来导入自行训练的 HMM 和 DAG 模型
 
 ## 安装
 
@@ -23,13 +23,13 @@
   cargo add pinyinchch -F hmm
   ```
 
-  如果使用默认提供的 hmm 模型，则需要引入 pinyinchch-model-hmm
+  如果使用默认提供的 hmm 模型，则需要引入 `pinyinchch-model-hmm`
 
   ```shell
   cargo add pinyinchch-model-hmm
   ```
 
-  如果想自己实现一个拼音到汉字的 hmm 模型，那么需要引入 pinyinchch-type, 并且实现 `Hmm` trait
+  如果想自己实现一个拼音到汉字的 hmm 模型，那么需要引入 `pinyinchch-type`, 并且实现 `Hmm` trait
 
   ```shell
   cargo add pinyinchch-type
@@ -41,13 +41,13 @@
   cargo add pinyinchch -F dag
   ```
 
-  如果需要使用默认提供的 dag 模型，则需要引入 pinyinchch-model-dag
+  如果需要使用默认提供的 dag 模型，则需要引入 `pinyinchch-model-dag`
 
   ```shell
   cargo add pinyinchch-model-dag
   ```
 
-  如果想自己实现一个拼音到汉字的 dag 模型，那么需要引入 pinyinchch-type, 并且实现 `dag` trait
+  如果想自己实现一个拼音到汉字的 dag 模型，那么需要引入 `pinyinchch-type`, 并且实现 `dag` trait
 
   ```shell
   cargo add pinyinchch-type
@@ -150,6 +150,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```bash
 cargo test
 ```
+
+## xtask 脚本
+
+该脚本负责将原本以 json 格式保存的模型转换成以 rkyv 格式保存
+
+在 workspace 中执行 `cargo xtask convert-to-rkyv` 即可将 data 目录下的模型转换到对应 crate 中
 
 ## 许可
 
