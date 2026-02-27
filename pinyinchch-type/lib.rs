@@ -11,8 +11,9 @@ macro_rules! embed_data {
             rkyv::from_bytes::<$t, rkyv::rancor::Error>(&aligned).expect(concat!(
                 "Failed to crate ",
                 stringify!($name),
-                "stringify!($name)",
-                $path
+                ".rkyv in the path(",
+                $path,
+                ")"
             ))
         });
     };
