@@ -26,26 +26,24 @@ pub fn dispatch(
     }
 
     // 处理起始位置（from_idx = 0）
-    for from_idx in 0..1 {
-        for to_idx in from_idx..pinyin_num {
-            let slice = &pinyin_seq[from_idx..to_idx + 1];
+    for to_idx in 0..pinyin_num {
+        let slice = &pinyin_seq[0..to_idx + 1];
 
-            let phrase_prob_pairs = dag.get_phrase(slice, path_num);
-            for (phrase, prob) in phrase_prob_pairs {
-                let word = vec![phrase];
-                let score = if use_log_prob { prob.ln() } else { prob };
-                dispatch_vec[to_idx].put(score, word);
-            }
+        let phrase_prob_pairs = dag.get_phrase(slice, path_num);
+        for (phrase, prob) in phrase_prob_pairs {
+            let word = vec![phrase];
+            let score = if use_log_prob { prob.ln() } else { prob };
+            dispatch_vec[to_idx].put(score, word);
         }
     }
 
     // 处理后续位置（from_idx >= 1）
     for from_idx in 1..pinyin_num {
-        // 先收集前一个位置的数据，避免借用冲突
-        let prev_items: Vec<_> = dispatch_vec[from_idx - 1]
+        // 先收集前一个位置的数据
+        let prev_items = dispatch_vec[from_idx - 1]
             .iter()
             .map(|item| (item.score(), item.path().clone()))
-            .collect();
+            .collect::<Vec<_>>();
 
         for to_idx in from_idx..pinyin_num {
             let slice = &pinyin_seq[from_idx..to_idx + 1];

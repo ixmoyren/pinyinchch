@@ -49,9 +49,8 @@ pub fn viterbi(
     time_and_state.push(initial_map);
 
     // 运行 t > 0 的Viterbi算法
-    for t in 1..pinyin_seq.len() {
-        let cur_obs = &pinyin_seq[t];
-        // 优化内存使用：只保留前一个时刻的结果
+    for &cur_obs in pinyin_seq.iter().skip(1) {
+        // 只保留前一个时刻的结果
         if time_and_state.len() == 2 {
             time_and_state = vec![time_and_state[time_and_state.len() - 1].clone()];
         }
@@ -97,7 +96,7 @@ pub fn viterbi(
     // 收集最终结果
     let mut result = PrioritySet::new(path_num);
     if let Some(final_map) = time_and_state.last() {
-        for (_state, ps) in final_map {
+        for ps in final_map.values() {
             for item in ps.iter() {
                 result.put(item.score(), item.path().clone());
             }
