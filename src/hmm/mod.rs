@@ -23,13 +23,9 @@ pub fn viterbi(
     // 存储到达时刻 time 状态 state 的最优路径
     let mut time_and_state = Vec::<HashMap<String, PrioritySet>>::new();
 
-    let time = 0;
-    let cur_obs = pinyin_seq[time];
-
     // 初始化基础情况 (t == 0)
-    let mut prev_states = hmm.get_states(cur_obs);
-    let cur_states = prev_states.clone();
-
+    let cur_obs = pinyin_seq[0];
+    let cur_states = hmm.get_states(cur_obs);
     let mut initial_map = HashMap::new();
     for state in &cur_states {
         let start_prob = hmm.start(state);
@@ -45,25 +41,22 @@ pub fn viterbi(
         ps.put(score, path);
         initial_map.insert(state.clone(), ps);
     }
-
     time_and_state.push(initial_map);
 
     // 运行 t > 0 的Viterbi算法
+    let mut prev_states = cur_states;
     for &cur_obs in pinyin_seq.iter().skip(1) {
         // 只保留前一个时刻的结果
         if time_and_state.len() == 2 {
             time_and_state = vec![time_and_state[time_and_state.len() - 1].clone()];
         }
-
         let mut next_map = HashMap::new();
-        let prev_states_clone = prev_states.clone();
         let cur_states = hmm.get_states(cur_obs);
-        prev_states = cur_states.clone();
 
         for y in &cur_states {
             let mut ps = PrioritySet::new(path_num);
 
-            for y0 in &prev_states_clone {
+            for y0 in &prev_states {
                 if let Some(prev_ps) = time_and_state[0].get(y0) {
                     for item in prev_ps.iter() {
                         let transition_prob = hmm.transition(y0, y);
@@ -91,6 +84,7 @@ pub fn viterbi(
         }
 
         time_and_state.push(next_map);
+        prev_states = cur_states;
     }
 
     // 收集最终结果
