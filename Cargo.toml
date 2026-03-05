@@ -19,7 +19,7 @@ pinyinchch-model-hmm = { path = "pinyinchch-model-hmm", version = "0.2.0", defau
 pinyinchch-model-dag = { path = "pinyinchch-model-dag", version = "0.2.0", default-features = false }
 rkyv = { version = "0.8.15", default-features = true, features = ["aligned"] }
 serde = { version = "1", features = ["derive"] }
-snafu = { version = "0.8.9", default-features = false, features = ["alloc", "std", "rust_1_81"] }
+snafu = { version = "0.9.0", default-features = false, features = ["alloc", "std", "rust_1_81"] }
 
 [package]
 name = "pinyinchch"

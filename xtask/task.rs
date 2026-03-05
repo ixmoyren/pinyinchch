@@ -1,13 +1,13 @@
 use pinyinchch_type::dag::{DagChar, DagPhrase};
 use pinyinchch_type::hmm::{HmmData, HmmEmission, HmmPy2Hz, HmmTransition};
 use rkyv::util::AlignedVec;
-use snafu::{Whatever, prelude::*};
+use snafu::{WhateverLocal, prelude::*};
 use std::fs::{File, create_dir_all, read_dir};
 use std::io::{BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-pub fn convert_to_rkyv() -> Result<(), Whatever> {
+pub fn convert_to_rkyv() -> Result<(), WhateverLocal> {
     let data_path =
         PathBuf::from_str("data").with_whatever_context(|_| "Couldn't crate path buf from str")?;
     if data_path.is_file() {
@@ -24,7 +24,7 @@ pub fn convert_to_rkyv() -> Result<(), Whatever> {
     Ok(())
 }
 
-fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
+fn to_rkyv(path: impl AsRef<Path>) -> Result<(), WhateverLocal> {
     let path = path.as_ref();
     let Some(file_name) = path.file_name().and_then(std::ffi::OsStr::to_str) else {
         whatever!("The path does not have a file name");
@@ -49,7 +49,7 @@ fn to_rkyv(path: impl AsRef<Path>) -> Result<(), Whatever> {
     Ok(())
 }
 
-fn get_rkyv_name_and_path(file_name: &str, path: &str) -> Result<(String, PathBuf), Whatever> {
+fn get_rkyv_name_and_path(file_name: &str, path: &str) -> Result<(String, PathBuf), WhateverLocal> {
     // rkyv 文件保存的目录
     let root_path =
         PathBuf::from_str(path).with_whatever_context(|_| "Couldn't crate path buf from str")?;
@@ -71,7 +71,7 @@ fn get_rkyv_name_and_path(file_name: &str, path: &str) -> Result<(String, PathBu
 fn to_bytes(
     reader: BufReader<File>,
     file_name: &str,
-) -> Result<(AlignedVec<16>, String, PathBuf), Whatever> {
+) -> Result<(AlignedVec<16>, String, PathBuf), WhateverLocal> {
     let result = match file_name {
         "dag_char.json" => {
             let dag_char = serde_json::from_reader::<_, DagChar>(reader)
