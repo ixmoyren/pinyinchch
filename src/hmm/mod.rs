@@ -47,8 +47,10 @@ pub fn viterbi(
     let mut prev_states = cur_states;
     for &cur_obs in pinyin_seq.iter().skip(1) {
         // 只保留前一个时刻的结果
-        if time_and_state.len() == 2 {
-            time_and_state = vec![time_and_state[time_and_state.len() - 1].clone()];
+        if time_and_state.len() == 2
+            && let Some(last_time_and_state) = time_and_state.pop()
+        {
+            time_and_state = vec![last_time_and_state];
         }
         let mut next_map = HashMap::new();
         let cur_states = hmm.get_states(cur_obs);
