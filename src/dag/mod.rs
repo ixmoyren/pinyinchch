@@ -67,14 +67,17 @@ pub fn dispatch(
     }
 
     // 获取最终结果
-    let mut result: Vec<Item> = dispatch_vec.last().unwrap().to_sorted_vec();
-    result.sort_by(|a, b| {
-        b.score()
-            .partial_cmp(&a.score())
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    result
+    if let Some(result) = dispatch_vec.last() {
+        let mut result = result.to_sorted_vec();
+        result.sort_by(|a, b| {
+            b.score()
+                .partial_cmp(&a.score())
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        result
+    } else {
+        Vec::new()
+    }
 }
 
 #[cfg(test)]
