@@ -15,13 +15,13 @@ pub fn viterbi(
     path_num: usize,
     use_log_prob: bool,
     min_prob: f64,
-) -> Vec<Item> {
+) -> Vec<Item<char>> {
     if pinyin_seq.is_empty() {
         return Vec::new();
     }
 
     // 存储到达时刻 time 状态 state 的最优路径
-    let mut time_and_state = Vec::<HashMap<String, PrioritySet>>::new();
+    let mut time_and_state = Vec::<HashMap<char, PrioritySet<char>>>::new();
 
     // 初始化基础情况 (t == 0)
     let cur_obs = pinyin_seq[0];
@@ -36,14 +36,14 @@ pub fn viterbi(
             f64::max(start_prob, min_prob) * f64::max(emission_prob, min_prob)
         };
 
-        let path = vec![state.clone()];
+        let path = vec![*state];
         let mut ps = PrioritySet::new(path_num);
         ps.put(score, path);
-        initial_map.insert(state.clone(), ps);
+        initial_map.insert(*state, ps);
     }
     time_and_state.push(initial_map);
 
-    // 运行 t > 0 的Viterbi算法
+    // 运行 t > 0 的 Viterbi 算法
     let mut prev_states = cur_states;
     for &cur_obs in pinyin_seq.iter().skip(1) {
         // 只保留前一个时刻的结果
@@ -75,14 +75,14 @@ pub fn viterbi(
                         };
 
                         let mut new_path = item.path().clone();
-                        new_path.push(y.clone());
+                        new_path.push(*y);
 
                         ps.put(new_score, new_path);
                     }
                 }
             }
 
-            next_map.insert(y.clone(), ps);
+            next_map.insert(*y, ps);
         }
 
         time_and_state.push(next_map);
@@ -99,7 +99,7 @@ pub fn viterbi(
         }
     }
 
-    let mut result_vec: Vec<Item> = result.to_sorted_vec();
+    let mut result_vec: Vec<Item<char>> = result.to_sorted_vec();
     result_vec.sort_by(|a, b| {
         b.score()
             .partial_cmp(&a.score())
@@ -117,43 +117,43 @@ mod tests {
     #[allow(unused)]
     struct TestHmm {
         states: Vec<String>,
-        start_probs: HashMap<String, f64>,
-        emission_probs: HashMap<String, HashMap<String, f64>>,
-        transition_probs: HashMap<String, HashMap<String, f64>>,
-        py2hz_map: HashMap<String, Vec<String>>,
+        start_probs: HashMap<char, f64>,
+        emission_probs: HashMap<char, HashMap<String, f64>>,
+        transition_probs: HashMap<char, HashMap<char, f64>>,
+        py2hz_map: HashMap<String, String>,
     }
 
     impl TestHmm {
         fn new() -> Self {
             let mut start_probs = HashMap::new();
-            start_probs.insert("你".to_string(), 0.6);
-            start_probs.insert("我".to_string(), 0.4);
+            start_probs.insert('你', 0.6);
+            start_probs.insert('我', 0.4);
 
             let mut emission_probs = HashMap::new();
             let mut ni_emissions = HashMap::new();
             ni_emissions.insert("ni".to_string(), 0.8);
             ni_emissions.insert("hello".to_string(), 0.2);
-            emission_probs.insert("你".to_string(), ni_emissions);
+            emission_probs.insert('你', ni_emissions);
 
             let mut wo_emissions = HashMap::new();
             wo_emissions.insert("wo".to_string(), 0.7);
             wo_emissions.insert("hello".to_string(), 0.3);
-            emission_probs.insert("我".to_string(), wo_emissions);
+            emission_probs.insert('我', wo_emissions);
 
             let mut transition_probs = HashMap::new();
             let mut ni_transitions = HashMap::new();
-            ni_transitions.insert("我".to_string(), 0.3);
-            ni_transitions.insert("你".to_string(), 0.7);
-            transition_probs.insert("你".to_string(), ni_transitions);
+            ni_transitions.insert('我', 0.3);
+            ni_transitions.insert('你', 0.7);
+            transition_probs.insert('你', ni_transitions);
 
             let mut wo_transitions = HashMap::new();
-            wo_transitions.insert("我".to_string(), 0.6);
-            wo_transitions.insert("你".to_string(), 0.4);
-            transition_probs.insert("我".to_string(), wo_transitions);
+            wo_transitions.insert('我', 0.6);
+            wo_transitions.insert('你', 0.4);
+            transition_probs.insert('我', wo_transitions);
 
             let mut py2hz_map = HashMap::new();
-            py2hz_map.insert("ni".to_string(), vec!["你".to_string()]);
-            py2hz_map.insert("wo".to_string(), vec!["我".to_string()]);
+            py2hz_map.insert("ni".to_string(), "你".to_string());
+            py2hz_map.insert("wo".to_string(), "我".to_string());
 
             TestHmm {
                 states: vec!["你".to_string(), "我".to_string()],
@@ -166,11 +166,11 @@ mod tests {
     }
 
     impl Hmm for TestHmm {
-        fn start(&self, state: &str) -> f64 {
+        fn start(&self, state: &char) -> f64 {
             self.start_probs.get(state).copied().unwrap_or(0.0)
         }
 
-        fn emission(&self, state: &str, observation: &str) -> f64 {
+        fn emission(&self, state: &char, observation: &str) -> f64 {
             if let Some(state_map) = self.emission_probs.get(state) {
                 state_map.get(observation).copied().unwrap_or(0.0)
             } else {
@@ -178,7 +178,7 @@ mod tests {
             }
         }
 
-        fn transition(&self, from_state: &str, to_state: &str) -> f64 {
+        fn transition(&self, from_state: &char, to_state: &char) -> f64 {
             if let Some(from_map) = self.transition_probs.get(from_state) {
                 from_map.get(to_state).copied().unwrap_or(0.0)
             } else {
@@ -186,11 +186,12 @@ mod tests {
             }
         }
 
-        fn get_states(&self, observation: &str) -> Vec<String> {
-            self.py2hz_map
-                .get(observation)
-                .cloned()
-                .unwrap_or_else(Vec::new)
+        fn get_states(&self, observation: &str) -> Vec<char> {
+            if let Some(hanzi_string) = self.py2hz_map.get(observation) {
+                hanzi_string.chars().collect()
+            } else {
+                Vec::new()
+            }
         }
     }
 
@@ -202,6 +203,6 @@ mod tests {
         let result = viterbi(&params, &observations, 2, false, 3.14e-200);
 
         assert!(!result.is_empty());
-        assert_eq!(result[0].path(), &vec!["你".to_string()]);
+        assert_eq!(result[0].path(), &vec!['你']);
     }
 }

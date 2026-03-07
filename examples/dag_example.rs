@@ -1,6 +1,13 @@
 use pinyinchch::dag::dispatch;
 use pinyinchch_model_dag::DefaultDag;
 
+// DAG结果:
+// 分数: 0.21953546530016635, 路径: ["你好"]
+// 分数: 0.015182124223139684, 路径: ["你", "好"]
+//
+// DAG结果 (对数概率):
+// 分数: -1.516241486396955, 路径: ["你好"]
+// 分数: -4.187636581156532, 路径: ["你", "好"]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 创建DAG参数实例
     let dag_params = DefaultDag::default();

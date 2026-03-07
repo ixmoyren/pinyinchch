@@ -1,16 +1,17 @@
 use std::clone::Clone;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
+use std::fmt::Debug;
 
 /// 项目包含分数和路径
 #[derive(Debug, Clone)]
-pub struct Item {
+pub struct Item<T> {
     score: f64,
-    path: Vec<String>,
+    path: Vec<T>,
 }
 
-impl Item {
-    pub fn new(score: f64, path: Vec<String>) -> Self {
+impl<T> Item<T> {
+    pub fn new(score: f64, path: Vec<T>) -> Self {
         Item { score, path }
     }
 
@@ -18,26 +19,26 @@ impl Item {
         self.score
     }
 
-    pub fn path(&self) -> &Vec<String> {
+    pub fn path(&self) -> &Vec<T> {
         &self.path
     }
 }
 
-impl PartialEq for Item {
+impl<T> PartialEq for Item<T> {
     fn eq(&self, other: &Self) -> bool {
         self.score == other.score
     }
 }
 
-impl Eq for Item {}
+impl<T> Eq for Item<T> {}
 
-impl PartialOrd for Item {
+impl<T> PartialOrd for Item<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Item {
+impl<T> Ord for Item<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         other
             .score
@@ -46,7 +47,10 @@ impl Ord for Item {
     }
 }
 
-impl std::fmt::Display for Item {
+impl<T> std::fmt::Display for Item<T>
+where
+    T: Debug,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "< score={}, path={:?} >", self.score, self.path)
     }
@@ -54,12 +58,15 @@ impl std::fmt::Display for Item {
 
 /// 优先集合，保持最多capacity个元素
 #[derive(Clone)]
-pub struct PrioritySet {
+pub struct PrioritySet<T> {
     capacity: usize,
-    data: BinaryHeap<Item>,
+    data: BinaryHeap<Item<T>>,
 }
 
-impl PrioritySet {
+impl<T> PrioritySet<T>
+where
+    T: Debug + Clone,
+{
     pub fn new(capacity: usize) -> Self {
         PrioritySet {
             capacity,
@@ -67,7 +74,7 @@ impl PrioritySet {
         }
     }
 
-    pub fn put(&mut self, score: f64, path: Vec<String>) {
+    pub fn put(&mut self, score: f64, path: Vec<T>) {
         let item = Item::new(score, path);
         self.data.push(item);
 
@@ -82,19 +89,22 @@ impl PrioritySet {
         self.data.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &Item> {
+    pub fn iter(&self) -> impl Iterator<Item = &Item<T>> {
         self.data.iter()
     }
 
     /// 转换为排序的向量（按分数降序）
-    pub fn to_sorted_vec(&self) -> Vec<Item> {
-        let mut items: Vec<Item> = self.data.iter().cloned().collect();
+    pub fn to_sorted_vec(&self) -> Vec<Item<T>> {
+        let mut items: Vec<Item<T>> = self.data.iter().cloned().collect();
         items.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal));
         items
     }
 }
 
-impl std::fmt::Display for PrioritySet {
+impl<T> std::fmt::Display for PrioritySet<T>
+where
+    T: Debug,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "[")?;
         for item in &self.data {
@@ -111,16 +121,16 @@ mod tests {
     #[test]
     fn test_priority_set() {
         let mut ps = PrioritySet::new(3);
-        ps.put(0.5, vec!["你".to_string()]);
-        ps.put(0.8, vec!["我".to_string()]);
-        ps.put(0.3, vec!["他".to_string()]);
+        ps.put(0.5, vec!['你']);
+        ps.put(0.8, vec!['我']);
+        ps.put(0.3, vec!['他']);
         // 应该替换掉0.3的元素
-        ps.put(0.9, vec!["她".to_string()]);
+        ps.put(0.9, vec!['她']);
 
         assert_eq!(ps.len(), 3);
 
         let sorted_items = ps.to_sorted_vec();
         assert_eq!(sorted_items[0].score, 0.9);
-        assert_eq!(sorted_items[0].path, vec!["她".to_string()]);
+        assert_eq!(sorted_items[0].path, vec!['她']);
     }
 }

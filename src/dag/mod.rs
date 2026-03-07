@@ -13,7 +13,7 @@ pub fn dispatch(
     pinyin_seq: &[&str],
     path_num: usize,
     use_log_prob: bool,
-) -> Vec<Item> {
+) -> Vec<Item<String>> {
     if pinyin_seq.is_empty() {
         return Vec::new();
     }
